@@ -1,26 +1,26 @@
-🔍 Solana Scanner
+# 🔍 Solana Scanner
 
-A high-performance Solana blockchain scanner written in Rust.
-It continuously monitors Solana slots, processes blocks, and applies customizable filters to detect specific on-chain activity (e.g., Raydium V4 liquidity events).
-Optionally, events can be published to RabbitMQ for downstream processing.
+A high-performance **Solana blockchain scanner** written in Rust.  
+It continuously monitors Solana slots, processes blocks, and applies customizable filters to detect specific on-chain activity (e.g., **Raydium V4 liquidity events**).  
+Optionally, events can be published to **RabbitMQ** for downstream processing.  
 
-✨ Features
+---
 
-⏱ Real-time scanning of Solana mainnet (via RPC + WebSocket).
+## ✨ Features
 
-⚡ Concurrent block processing with configurable queue capacity.
+- ⏱ Real-time scanning of Solana mainnet (via RPC + WebSocket).  
+- ⚡ Concurrent block processing with configurable queue capacity.  
+- 🧩 Pluggable transaction filters (currently supports **Raydium V4 Liquidity**).  
+- 📡 Optional **RabbitMQ integration** for event publishing.  
+- 🛠 Configurable via `.env` file (easy to tweak without code changes).  
+- 📜 Structured logging with `tracing`.  
+- ✅ Error-handling & graceful shutdown (`Ctrl+C`).  
 
-🧩 Pluggable transaction filters (currently supports Raydium V4 Liquidity).
+---
 
-📡 RabbitMQ integration (optional) for event publishing.
+## 📂 Project Structure
 
-🛠 Configurable via .env file (easy to tweak without code changes).
-
-📜 Structured logging with tracing.
-
-✅ Error-handling & graceful shutdown via Ctrl+C.
-
-📂 Project Structure
+```
 src/
  ├── main.rs          # Entry point
  ├── config.rs        # Loads environment configuration
@@ -29,11 +29,15 @@ src/
  ├── filters/         # Built-in filters (e.g. Raydium V4 Liquidity)
  ├── scanner.rs       # Core scanner logic
  └── rabbitmq.rs      # RabbitMQ integration (feature-gated)
+```
 
-⚙️ Configuration
+---
 
-Set up your .env file:
+## ⚙️ Configuration
 
+Set up your `.env` file:
+
+```env
 # Solana RPC Configuration
 SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 SOLANA_WS_URL=wss://api.mainnet-beta.solana.com
@@ -50,83 +54,110 @@ RABBITMQ_PREFIX=solana_scanner
 
 # Filter Configuration
 ENABLED_FILTERS=raydium_v4_liquidity
+```
 
-Key Parameters
-Variable	Description	Default
-SOLANA_RPC_URL	Solana RPC endpoint	mainnet-beta RPC
-SOLANA_WS_URL	Solana WebSocket endpoint	mainnet-beta WS
-SCAN_INTERVAL_MS	Interval (ms) between slot checks	1000
-MAX_CONCURRENT_BLOCKS	Maximum blocks processed in parallel	10
-QUEUE_CAPACITY	Capacity of internal slot queue	1000
-RABBITMQ_ENABLED	Enable RabbitMQ integration	false
-RABBITMQ_URL	RabbitMQ connection string	amqp://guest:guest@localhost
-RABBITMQ_PREFIX	Queue prefix name	solana_scanner
-ENABLED_FILTERS	Comma-separated list of enabled filters	raydium_v4_liquidity
-🚀 Getting Started
-1. Clone the repo
+### Key Parameters
+
+| Variable               | Description                          | Default                      |
+|------------------------|--------------------------------------|------------------------------|
+| `SOLANA_RPC_URL`       | Solana RPC endpoint                  | mainnet-beta RPC             |
+| `SOLANA_WS_URL`        | Solana WebSocket endpoint            | mainnet-beta WS              |
+| `SCAN_INTERVAL_MS`     | Interval (ms) between slot checks    | 1000                         |
+| `MAX_CONCURRENT_BLOCKS`| Maximum blocks processed in parallel | 10                           |
+| `QUEUE_CAPACITY`       | Capacity of internal slot queue      | 1000                         |
+| `RABBITMQ_ENABLED`     | Enable RabbitMQ integration          | false                        |
+| `RABBITMQ_URL`         | RabbitMQ connection string           | amqp://guest:guest@localhost |
+| `RABBITMQ_PREFIX`      | Queue prefix name                    | solana_scanner               |
+| `ENABLED_FILTERS`      | Comma-separated list of filters      | raydium_v4_liquidity         |
+
+---
+
+## 🚀 Getting Started
+
+1. **Clone the repo**
+
+```bash
 git clone https://github.com/yourusername/solana-scanner.git
 cd solana-scanner
+```
 
-2. Install dependencies
+2. **Install dependencies**
 
-Ensure you have Rust (1.70+) and Cargo installed.
+Ensure you have **Rust (1.70+)** and Cargo installed.
 
+```bash
 cargo build
+```
 
-3. Configure environment
+3. **Configure environment**
 
-Copy .env.example → .env and update values as needed.
+Copy `.env.example` → `.env` and update values as needed.
 
-4. Run the scanner
+4. **Run the scanner**
+
+```bash
 cargo run
+```
 
-🧩 Filters
+---
 
-Filters are modular components implementing the TransactionFilter trait.
+## 🧩 Filters
 
-Available Filters
+Filters are modular components implementing the `TransactionFilter` trait.
 
-Raydium V4 Liquidity Filter
-Detects liquidity pool creation & updates in Raydium's V4 contracts.
+### Available Filters
 
-Example: Enabling a filter
+- **Raydium V4 Liquidity Filter** → Detects liquidity pool creation & updates in Raydium's V4 contracts.
+
+**Example: Enabling a filter**
+
+```env
 ENABLED_FILTERS=raydium_v4_liquidity
+```
 
-📡 RabbitMQ Integration
+---
 
-If RABBITMQ_ENABLED=true, matched transactions are published to queues.
+## 📡 RabbitMQ Integration
 
-Queue names are prefixed with RABBITMQ_PREFIX.
+If `RABBITMQ_ENABLED=true`, matched transactions are published to queues.
 
-Each filter has its own queue (e.g., solana_scanner_raydium_v4_liquidity).
+- Queue names are prefixed with `RABBITMQ_PREFIX`.  
+- Each filter has its own queue (e.g., `solana_scanner_raydium_v4_liquidity`).  
+- Messages are serialized JSON payloads of processed transactions.  
 
-Messages are serialized JSON payloads of processed transactions.
+---
 
-🛠 Development
-Run tests
+## 🛠 Development
+
+Run tests:
+
+```bash
 cargo test
+```
 
-With feature flags
+With RabbitMQ feature flag:
 
-With RabbitMQ:
-
+```bash
 cargo run --features rabbitmq
-
+```
 
 Without RabbitMQ:
 
+```bash
 cargo run --no-default-features
+```
 
-📊 Architecture
+---
 
-Slot Monitor
-Polls the Solana RPC for the latest slot and pushes new slots into a queue.
+## 📊 Architecture
 
-Block Processor
-Concurrently fetches blocks from the queue, applies filters, and handles matches.
+- **Slot Monitor** → Polls the Solana RPC for the latest slot and pushes new slots into a queue.  
+- **Block Processor** → Concurrently fetches blocks, applies filters, and handles matches.  
+- **Filters** → Each filter checks transactions and extracts relevant event data.  
+- **RabbitMQ (optional)** → Publishes matched events to message queues for external consumption.  
 
-Filters
-Each filter checks transactions and processes matches (e.g., extract event data).
+---
 
-RabbitMQ (optional)
-Matched events are published to message queues for external consumption.
+## 📜 License
+
+MIT License. See [LICENSE](LICENSE) for details.
